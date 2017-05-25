@@ -15,7 +15,7 @@ pub trait Xor {
 }
 
 impl Xor for Read {
-    fn xor(&mut self, key_bytes : Vec<u8>) -> Vec<u8> {
+    fn xor<'a>(&'a mut self, key_bytes : Vec<u8>) -> Vec<u8> {
 
         let mut key_idx = 0;
         let mut warning_shown = false;

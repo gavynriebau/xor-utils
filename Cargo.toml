@@ -1,6 +1,6 @@
 [package]
 name = "xor-utils"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["gavyn <gavyn.riebau@gmail.com>"]
 description = "Utility functions related to xor encryption / decryption"
 license = "MIT"
