@@ -1,0 +1,7 @@
+[package]
+name = "xor-utils"
+version = "0.1.0"
+authors = ["gavyn <gavyn.riebau@gmail.com>"]
+
+[dependencies]
+log = "0.3.8"
