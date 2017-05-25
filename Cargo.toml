@@ -2,6 +2,15 @@
 name = "xor-utils"
 version = "0.1.0"
 authors = ["gavyn <gavyn.riebau@gmail.com>"]
+description = "Utility functions related to xor encryption / decryption"
+license = "MIT"
+
+documentation = "https://github.com/gavynriebau/xor-utils"
+homepage = "https://github.com/gavynriebau/xor-utils"
+repository = "https://github.com/gavynriebau/xor-utils"
+
+keywords = ["xor", "cryptography", "encryption", "decryption"]
+categories = ["cryptography"]
 
 [dependencies]
 log = "0.3.8"
