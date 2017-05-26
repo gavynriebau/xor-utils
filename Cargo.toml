@@ -1,6 +1,6 @@
 [package]
 name = "xor-utils"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["gavyn <gavyn.riebau@gmail.com>"]
 description = "Utility functions related to xor encryption / decryption"
 license = "MIT"
@@ -13,4 +13,5 @@ keywords = ["xor", "cryptography", "encryption", "decryption"]
 categories = ["cryptography"]
 
 [dependencies]
+hamming = "0.1.3"
 log = "0.3.8"
