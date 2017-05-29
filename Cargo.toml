@@ -1,11 +1,11 @@
 [package]
 name = "xor-utils"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["gavyn <gavyn.riebau@gmail.com>"]
 description = "Utility functions related to xor encryption / decryption"
 license = "MIT"
 
-documentation = "https://github.com/gavynriebau/xor-utils"
+documentation = "https://docs.rs/crate/xor-utils"
 homepage = "https://github.com/gavynriebau/xor-utils"
 repository = "https://github.com/gavynriebau/xor-utils"
 
