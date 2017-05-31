@@ -153,26 +153,30 @@ pub fn load_words_list(path : &str) -> Vec<String> {
     dictionary_lines
 }
 
+fn recursive_add_keys(length: u32, prefix : Vec<u8>, keys : &mut Vec<String>) {
+    if prefix.len() == (length as usize) {
+        // Key has been generated
+        let key = String::from_utf8(prefix).unwrap();
+        keys.push(key);
+    } else {
+        for idx in 0..128 {
+            let mut new_prefix = prefix.clone();
+            new_prefix.push(idx);
+
+            recursive_add_keys(length, new_prefix, keys);
+        }
+    }
+}
+
 
 /// Generate all combinations of ASCII up to the supplied character length.
 ///
 /// This can be used to get all the possible ASCII keys of a certain character length.
 pub fn gen_ascii_keys(length : u32) -> Vec<String> {
     let mut keys : Vec<String> = Vec::new();
-    let max = 128u32.pow(length);
+    let prefix : Vec<u8> = Vec::new();
 
-    for i in 0..max {
-        let mut value = i;
-        let mut key = String::new();
-
-        for j in (0..length).rev() {
-            let digit = value / 128u32.pow(j);
-            value = value - digit * 128u32.pow(j);
-            key.push_str(format!("{}", (digit as u8) as char).as_str());
-        }
-
-        keys.push(key);
-    }
+    recursive_add_keys(length, prefix, &mut keys);
 
     keys
 }
