@@ -12,6 +12,7 @@ use std::io::{Read, BufReader};
 use std::fs::File;
 use hamming::distance;
 use std::collections::HashMap;
+use std::ascii::AsciiExt;
 
 pub trait Xor {
     /// Creates xor encrypted copy of data using the provided key.
@@ -93,11 +94,46 @@ impl Score for char {
 
 impl Score for String {
     fn score(&self) -> f32 {
+
+        let expected_char_frequency = get_char_score_map();
+
+        // Filter to only ascii characters that are contained in the expected char freq dict.
+        // Uppercase is mapped to lowercase.
+        let ascii_only_vector : Vec<u8> = self.chars()
+            .filter(|c| c.is_ascii())
+            .map(|c| c.to_ascii_lowercase())
+            .filter(|c| expected_char_frequency.get(&c).is_some())
+            .map(|c| c as u8)
+            .collect();
+
+        // String containing only the ascii parts of the input string.
+        let ascii_only = String::from_utf8(ascii_only_vector).unwrap();
+        debug!("Ascii only is: {}", ascii_only);
+
+        let mut actual_char_frequency = HashMap::new();
+
+        // Build the dict of actual char frequencies.
+        for c in ascii_only.chars() {
+            let count = actual_char_frequency.entry(c).or_insert(0.0);
+            *count += 1.0;
+        }
+        for count in actual_char_frequency.values_mut() {
+            *count = *count / ascii_only.len() as f32;
+        }
+
         let mut sum = 0.0f32;
 
-        for c in self.chars() {
-            sum += score_character(c);
+        for (c, freq) in actual_char_frequency {
+            let expected = expected_char_frequency.get(&c).unwrap();
+            let diff = (*expected - freq).abs() * 10.0;
+
+            debug!("Diff for char '{}' is {}", c, diff);
+            sum += diff;
         }
+
+        let proportion_of_ascii = ascii_only.len() as f32 / self.len() as f32;
+
+        sum = sum * proportion_of_ascii;
 
         sum
     }
@@ -284,32 +320,33 @@ fn score_character(c : char) -> f32 {
 fn get_char_score_map() -> HashMap<char, f32> {
     let mut character_scores = HashMap::new();
 
-    character_scores.insert('e', 12.702);	
-    character_scores.insert('t', 9.056);	
-    character_scores.insert('a', 8.167);	
-    character_scores.insert('o', 7.507);	
-    character_scores.insert('i', 6.966);	
-    character_scores.insert('n', 6.749);	
-    character_scores.insert('s', 6.327);	
-    character_scores.insert('h', 6.094);	
-    character_scores.insert('r', 5.987);	
-    character_scores.insert('d', 4.253);	
-    character_scores.insert('l', 4.025);	
-    character_scores.insert('c', 2.782);	
-    character_scores.insert('u', 2.758);	
-    character_scores.insert('m', 2.406);	
-    character_scores.insert('w', 2.360);	
-    character_scores.insert('f', 2.228);	
-    character_scores.insert('g', 2.015);	
-    character_scores.insert('y', 1.974);	
-    character_scores.insert('p', 1.929);	
-    character_scores.insert('b', 1.492);	
-    character_scores.insert('v', 0.978);	
-    character_scores.insert('k', 0.772);	
-    character_scores.insert('j', 0.153);	
-    character_scores.insert('x', 0.150);	
-    character_scores.insert('q', 0.095);	
-    character_scores.insert('z', 0.074);	
+    character_scores.insert(' ', 15.000); // This is just guessed
+    character_scores.insert('e', 12.702);
+    character_scores.insert('t', 9.056);
+    character_scores.insert('a', 8.167);
+    character_scores.insert('o', 7.507);
+    character_scores.insert('i', 6.966);
+    character_scores.insert('n', 6.749);
+    character_scores.insert('s', 6.327);
+    character_scores.insert('h', 6.094);
+    character_scores.insert('r', 5.987);
+    character_scores.insert('d', 4.253);
+    character_scores.insert('l', 4.025);
+    character_scores.insert('c', 2.782);
+    character_scores.insert('u', 2.758);
+    character_scores.insert('m', 2.406);
+    character_scores.insert('w', 2.360);
+    character_scores.insert('f', 2.228);
+    character_scores.insert('g', 2.015);
+    character_scores.insert('y', 1.974);
+    character_scores.insert('p', 1.929);
+    character_scores.insert('b', 1.492);
+    character_scores.insert('v', 0.978);
+    character_scores.insert('k', 0.772);
+    character_scores.insert('j', 0.153);
+    character_scores.insert('x', 0.150);
+    character_scores.insert('q', 0.095);
+    character_scores.insert('z', 0.074);
 
     character_scores
 }
@@ -338,6 +375,23 @@ mod tests {
         assert_eq!(0b11111111u8, cipher[5]);
         assert_eq!(0b11111111u8, cipher[6]);
         assert_eq!(0b11111111u8, cipher[7]);
+    }
+
+    #[test]
+    fn scoring_strings_works() {
+        let a = String::from("hello world");
+        let b = String::from("9[;,1.23,45");
+        let c = String::from("$*(&^$@!as3");
+        let d = String::from("kj12asd89hh");
+
+        let score_a = a.score();
+        let score_b = b.score();
+        let score_c = c.score();
+        let score_d = d.score();
+
+        assert!(score_a > score_b);
+        assert!(score_a > score_c);
+        assert!(score_a > score_d);
     }
 
 }
