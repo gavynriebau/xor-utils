@@ -16,10 +16,10 @@ use std::ascii::AsciiExt;
 
 pub trait Xor {
     /// Creates xor encrypted copy of data using the provided key.
-    fn xor(&mut self, key_bytes : Vec<u8>) -> Vec<u8>;
+    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8>;
 }
 
-fn xor(reader: &mut Read, key_bytes : Vec<u8>) -> Vec<u8> {
+fn xor(reader: &mut Read, key_bytes : &Vec<u8>) -> Vec<u8> {
     let mut key_idx = 0;
     let mut warning_shown = false;
     let mut encoded_bytes: Vec<u8> = Vec::new();
@@ -58,13 +58,13 @@ fn xor(reader: &mut Read, key_bytes : Vec<u8>) -> Vec<u8> {
 }
 
 impl<'a, R: Read> Xor for &'a mut R {
-    fn xor(&mut self, key_bytes : Vec<u8>) -> Vec<u8> {
+    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8> {
         xor(self, key_bytes)
     }
 }
 
 impl Xor for Read {
-    fn xor(&mut self, key_bytes : Vec<u8>) -> Vec<u8> {
+    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8> {
         xor(self, key_bytes)
     }
 }
@@ -241,7 +241,7 @@ pub fn avg_normalized_hamming_distance(input : &Vec<u8>, max_keysize : usize) ->
 
         // Calculate the mean normalized hamming distance over a
         // number of samples to try to improve accuracy.
-        loop {
+        for _ in 1..3 {
 
             let left_chunk = chunks.next();
             let right_chunk = chunks.next();
