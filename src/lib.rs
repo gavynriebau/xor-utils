@@ -12,14 +12,13 @@ use std::io::{Read, BufReader};
 use std::fs::File;
 use hamming::distance;
 use std::collections::HashMap;
-use std::ascii::AsciiExt;
 
 pub trait Xor {
     /// Creates xor encrypted copy of data using the provided key.
-    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8>;
+    fn xor(&mut self, key_bytes : &[u8]) -> Vec<u8>;
 }
 
-fn xor(reader: &mut Read, key_bytes : &Vec<u8>) -> Vec<u8> {
+fn xor<R: Read + ?Sized>(reader: &mut R, key_bytes : &[u8]) -> Vec<u8> {
     let mut key_idx = 0;
     let mut warning_shown = false;
     let mut encoded_bytes: Vec<u8> = Vec::new();
@@ -57,14 +56,8 @@ fn xor(reader: &mut Read, key_bytes : &Vec<u8>) -> Vec<u8> {
     encoded_bytes
 }
 
-impl<'a, R: Read> Xor for &'a mut R {
-    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8> {
-        xor(self, key_bytes)
-    }
-}
-
-impl Xor for Read {
-    fn xor(&mut self, key_bytes : &Vec<u8>) -> Vec<u8> {
+impl<'a, R: Read + ?Sized> Xor for R {
+    fn xor(&mut self, key_bytes : &[u8]) -> Vec<u8> {
         xor(self, key_bytes)
     }
 }
@@ -363,9 +356,9 @@ mod tests {
         let data : Vec<u8>  = vec![0b11111111u8, 0b11111111u8, 0b00001111u8, 0b10101010u8, 0b11111111u8, 0b11111111u8, 0b00001111u8, 0b10101010u8];
         let key : Vec<u8>   = vec![0b11111111u8, 0b00000000u8, 0b11110000u8, 0b01010101u8];
 
-        let reader : &mut Read = &mut Cursor::new(data);
+        let mut reader = Cursor::new(data);
 
-        let cipher = reader.xor(key);
+        let cipher = reader.xor(&key);
 
         assert_eq!(0b00000000u8, cipher[0]);
         assert_eq!(0b11111111u8, cipher[1]);
